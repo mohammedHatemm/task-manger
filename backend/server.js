@@ -5,6 +5,9 @@ const path = require('path')
 const connectDB = require('./config/db');
 
 
+const authRoutes = require('./routes/authRoutes');
+
+
 const app = express();
 
 // midellware to handel  cores
@@ -25,7 +28,8 @@ app.use(express.json());
 
 
 // routes
-// app.use("/api/auth", authRoutes )
+
+app.use("/api/auth", authRoutes )
 // app.use("/api/reports" , reportRoutes)
 // app.use("/api/users" ,userRoutes)
 // app.use("/api/tasks" , tasksRoutes)

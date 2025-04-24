@@ -1,5 +1,5 @@
 const mongoose =require('mongoose');
-const userShema = new mongoose.Schema(
+const UserShema = new mongoose.Schema(
   {
   name:{type:String,required:true},
 email:{type:String , require:true , unique:true},
@@ -10,4 +10,4 @@ role:{type:String,enum:['member','admin'],default:'member'},
 {timeseries:true}
 );
 
-export default mongoose.model('User',userShema);
+module.exports = mongoose.model('User',UserShema);
