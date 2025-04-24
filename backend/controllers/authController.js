@@ -10,7 +10,7 @@ const generatToken = (userId) =>{
 
 const registerUser = async (req,res) =>{
   try{
-    const {name, email, password , profileImageUrlile, adminInviteToken} = req.body;
+    const {name, email, password , profileImageUrl, adminInviteToken} = req.body;
     const existingUser = await User.findOne({email});
     if(existingUser){
       return res.status(400).json({message:"User already exists"})
@@ -25,7 +25,7 @@ const registerUser = async (req,res) =>{
       name,
       email,
       password:hashedPassword,
-      profileImageUrlile,
+      profileImageUrl,
       role,
     });
     res.status(201).json({
@@ -47,7 +47,26 @@ const registerUser = async (req,res) =>{
 }
 
 const loginUser = async(req ,res)=>{
-  try{}
+  try{
+    const {email,password} = req.body;
+    const user = await User.findOne({email});
+    if(!user){
+      return res.status(400).json({message:"Invalid emai or password "})
+       }
+       const isMatch = await bcrypt.compare(password,user.password);
+       if(!isMatch){
+        return res.status(400).json({message:"Invalid emai or password "})
+       }
+       res.json({
+        _id:user._id,
+        name:user.name,
+        email:user.email,
+        profileImageUrl:user.profileImageUrl,
+        role:user.role,
+        token:generatToken(user._id),
+       })
+
+  }
   catch(error){
     console.log(error)
     res.status(500).json({message:"Internal server error" ,error:error.message})
@@ -58,7 +77,13 @@ const loginUser = async(req ,res)=>{
 }
 
 const getUserProfile = async(req , res) =>{
-  try{}
+  try{
+    const user = await User.findById(req.user.id).select("-password");
+    if(!user){
+      return res.status(404).json({message:"User not found"})
+    }
+    res.json(user);
+  }
   catch(error){
     console.log(error)
     res.status(500).json({message:"Internal server error" ,error:error.message})
@@ -66,10 +91,31 @@ const getUserProfile = async(req , res) =>{
   }
 
 
-}
+};
 
 const updateUserProfile = async(req,res) =>{
-  try{}
+  try{
+    const user = await User.findById(req.user.id);
+    if(!user){
+      return res.status(404).json({message:"User not found"})
+
+    }
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    if(req.body.password){
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(req.body.password,salt);
+    }
+   const updatedUser = await user.save();
+   res.json({
+    _id:updatedUser._id,
+    name:updatedUser.name,
+    email:updatedUser.email,
+    profileImageUrl:updatedUser.profileImageUrl,
+    role:updatedUser.role,
+    token:generatToken(updatedUser._id),
+   })
+  }
   catch(error){
     console.log(error)
     res.status(500).json({message:"Internal server error" ,error:error.message})

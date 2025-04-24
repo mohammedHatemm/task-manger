@@ -7,7 +7,7 @@ password:{type:String,require:true},
 profileImageUrl:{type:String , default:null},
 role:{type:String,enum:['member','admin'],default:'member'},
 },
-{timeseries:true}
+{timestamps:true},
 );
 
 module.exports = mongoose.model('User',UserShema);
